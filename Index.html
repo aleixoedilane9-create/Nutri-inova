@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nutri Inova - Acesso ao Sistema</title>
+  <script src="https://unpkg.com"></script>
+  <style>
+    * { box-sizing: border-box; font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    body { background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .card { background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 420px; }
+    h1 { color: #2e7d32; font-size: 22px; margin-bottom: 8px; text-align: center; }
+    p.subtitulo { color: #666; font-size: 14px; text-align: center; margin-bottom: 20px; }
+    .abas { display: flex; margin-bottom: 20px; border-bottom: 2px solid #eee; }
+    .aba { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-weight: bold; color: #777; }
+    .aba.ativa { color: #2e7d32; border-bottom: 2px solid #2e7d32; }
+    .campo { margin-bottom: 15px; }
+    label { display: block; font-size: 13px; color: #333; margin-bottom: 5px; font-weight: bold; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+    button { width: 100%; padding: 12px; background-color: #2e7d32; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    button:hover { background-color: #1b5e20; }
+    button.sair { background-color: #c62828; margin-top: 20px; }
+    button.sair:hover { background-color: #8e0000; }
+    .mensagem { margin-top: 15px; padding: 10px; border-radius: 6px; font-size: 13px; text-align: center; display: none; }
+    .erro { background-color: #ffebee; color: #c62828; display: block; }
+    .sucesso { background-color: #e8f5e9; color: #2e7d32; display: block; }
+    .oculto { display: none; }
+    .painel-box { background: #e8f5e9; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #2e7d32; font-size: 14px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+  <!-- TELA DE LOGIN E CADASTRO -->
+  <div class="card" id="tela-acesso">
+    <h1>Nutri Inova 🌱</h1>
+    <p class="subtitulo">Acesso seguro para nutricionistas e pacientes</p>
+
+    <div class="abas">
+      <div class="aba ativa" id="aba-login" onclick="alternarAba('login')">Entrar</div>
+      <div class="aba" id="aba-cadastro" onclick="alternarAba('cadastro')">Criar Conta</div>
+    </div>
+
+    <!-- FORMULÁRIO DE LOGIN -->
+    <form id="form-login" onsubmit="fazerLogin(event)">
+      <div class="campo">
+        <label>E-mail</label>
+        <input type="email" id="login-email" required placeholder="seu@email.com">
+      </div>
+      <div class="campo">
+        <label>Senha</label>
+        <input type="password" id="login-senha" required placeholder="••••••••">
+      </div>
+      <button type="submit">Entrar no Sistema</button>
+    </form>
+
+    <!-- FORMULÁRIO DE CADASTRO -->
+    <form id="form-cadastro" class="oculto" onsubmit="fazerCadastro(event)">
+      <div class="campo">
+        <label>Nome Completo</label>
+        <input type="text" id="cad-nome" required placeholder="Ex: Dra. Ana Silva">
+      </div>
+      <div class="campo">
+        <label>Tipo de Acesso</label>
+        <select id="cad-role" required>
+          <option value="patient">Sou Paciente</option>
+          <option value="nutritionist">Sou Nutricionista</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label>E-mail</label>
+        <input type="email" id="cad-email" required placeholder="seu@email.com">
+      </div>
+      <div class="campo">
+        <label>Senha (mínimo 6 caracteres)</label>
+        <input type="password" id="cad-senha" required minlength="6" placeholder="••••••••">
+      </div>
+      <button type="submit">Finalizar Cadastro</button>
+    </form>
+
+    <div id="aviso" class="mensagem"></div>
+  </div>
+
+  <!-- PAINEL DO NUTRICIONISTA -->
+  <div class="card oculto" id="painel-nutricionista">
+    <h1>Nutri Inova - Profissional 🩺</h1>
+    <p class="subtitulo" id="boas-vindas-nutri">Olá!</p>
+    <div class="painel-box">
+      <strong>Perfil: Nutricionista</strong><br>
+      Base conectada! Na próxima etapa vamos ativar aqui o vínculo com pacientes, avaliações e planos alimentares.
+    </div>
+    <button class="sair" onclick="fazerLogout()">Sair da Conta</button>
+  </div>
+
+  <!-- PAINEL DO PACIENTE -->
+  <div class="card oculto" id="painel-paciente">
+    <h1>Nutri Inova - Paciente 🥗</h1>
+    <p class="subtitulo" id="boas-vindas-paciente">Olá!</p>
+    <div class="painel-box">
+      <strong>Perfil: Paciente</strong><br>
+      Base conectada! Na próxima etapa você poderá ver aqui suas avaliações nutricionais e seu plano alimentar.
+    </div>
+    <button class="sair" onclick="fazerLogout()">Sair da Conta</button>
+  </div>
+  <script src="https://jsdelivr.net"<script src="https://jsdelivr.net"></script>
+<script>
+  const SUPABASE_URL = 'https://fnbowtmiojqnxplvhyzh.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_jRgeR7NasLIv04tX-JRYSQ_vpxvt-_';
+  let supabaseClient = null;
+    if (window.supabase) {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    function alternarAba(aba) {
+      limparAviso();
+      if (aba === 'login') {
+        document.getElementById('aba-login').classList.add('ativa');
+        document.getElementById('aba-cadastro').classList.remove('ativa');
+        document.getElementById('form-login').classList.remove('oculto');
+        document.getElementById('form-cadastro').classList.add('oculto');
+      } else {
+        document.getElementById('aba-cadastro').classList.add('ativa');
+        document.getElementById('aba-login').classList.remove('ativa');
+        document.getElementById('form-cadastro').classList.remove('oculto');
+        document.getElementById('form-login').classList.add('oculto');
+      }
+    }
+
+    function mostrarAviso(texto, tipo) {
+      const aviso = document.getElementById('aviso');
+      aviso.textContent = texto;
+      aviso.className = 'mensagem ' + tipo;
+    }
+
+    function limparAviso() {
+      const aviso = document.getElementById('aviso');
+      aviso.className = 'mensagem';
+      aviso.textContent = '';
+    }
+
+    async function fazerCadastro(event) {
+      event.preventDefault();
+      limparAviso();
+
+      if (!supabaseClient) {
+        mostrarAviso('Biblioteca do Supabase não carregou. Verifique sua internet e atualize (F5).', 'erro');
+        return;
+      }
+
+      const fullName = document.getElementById('cad-nome').value;
+      const role = document.getElementById('cad-role').value;
+      const email = document.getElementById('cad-email').value;
+      const password = document.getElementById('cad-senha').value;
+
+      const { data, error } = await supabaseClient.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: { full_name: fullName, role: role }
+        }
+      });
+
+      if (error) {
+        mostrarAviso('Erro ao cadastrar: ' + error.message, 'erro');
+        return;
+      }
+
+      if (data.user) {
+        const { error: profileError } = await supabaseClient
+          .from('profiles')
+          .insert([{ id: data.user.id, full_name: fullName, role: role }]);
+
+        if (profileError) {
+          console.warn('Aviso ao gravar em profiles:', profileError.message);
+        }
+      }
+
+      mostrarAviso('Conta criada com sucesso! Verifique seu e-mail ou faça login na aba Entrar.', 'sucesso');
+      document.getElementById('form-cadastro').reset();
+    }
+
+    async function fazerLogin(event) {
+      event.preventDefault();
+      limparAviso();
+
+      if (!supabaseClient) {
+        mostrarAviso('Biblioteca do Supabase não carregou. Verifique sua internet e atualize (F5).', 'erro');
+        return;
+      }
+
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-senha').value;
+
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      if (error) {
+        mostrarAviso('Erro ao entrar: ' + error.message, 'erro');
+        return;
+      }
+
+      direcionarUsuario(data.user);
+    }
+
+    async function direcionarUsuario(user) {
+      let role = user.user_metadata?.role || 'patient';
+      let fullName = user.user_metadata?.full_name || user.email;
+
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('full_name, role')
+        .eq('id', user.id)
+        .single();
+
+      if (profile) {
+        role = profile.role;
+        fullName = profile.full_name || fullName;
+      }
+
+      document.getElementById('tela-acesso').classList.add('oculto');
+
+      if (role === 'nutritionist') {
+        document.getElementById('boas-vindas-nutri').textContent = 'Bem-vindo(a), ' + fullName;
+        document.getElementById('painel-nutricionista').classList.remove('oculto');
+      } else {
+        document.getElementById('boas-vindas-paciente').textContent = 'Bem-vindo(a), ' + fullName;
+        document.getElementById('painel-paciente').classList.remove('oculto');
+      }
+    }
+
+    async function fazerLogout() {
+      if (supabaseClient) {
+        await supabaseClient.auth.signOut();
+      }
+      document.getElementById('painel-nutricionista').classList.add('oculto');
+      document.getElementById('painel-paciente').classList.add('oculto');
+      document.getElementById('tela-acesso').classList.remove('oculto');
+      document.getElementById('form-login').reset();
+      limparAviso();
+    }
+
+    window.onload = async () => {
+      if (!supabaseClient) return;
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && session.user) {
+        direcionarUsuario(session.user);
+      }
+    };
+  </script>
+</body>
+</html>
