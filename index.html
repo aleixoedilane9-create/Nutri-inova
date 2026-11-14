@@ -41,7 +41,6 @@
 </head>
 <body>
 
-  <!-- TELA DE LOGIN / CADASTRO -->
   <div class="card card-login" id="tela-auth">
     <h1>Nutri Inova 🥗</h1>
     <p class="subtitulo">Avaliação e acompanhamento nutricional em tempo real</p>
@@ -89,13 +88,11 @@
     <div id="mensagem-aviso" class="aviso"></div>
   </div>
 
-  <!-- PAINEL DO NUTRICIONISTA -->
   <div class="card oculto" id="painel-nutricionista">
     <h1>Nutri Inova - Profissional 🩺</h1>
     <p class="subtitulo" id="boas-vindas-nutri">Bem-vindo(a)!</p>
     <div id="aviso-nutri" class="aviso" style="margin-bottom: 16px;"></div>
 
-    <!-- 1. Vincular Paciente -->
     <div class="secao">
       <h2>1. Vincular Novo Paciente</h2>
       <div class="grid-2" style="align-items: end;">
@@ -107,7 +104,6 @@
       </div>
     </div>
 
-    <!-- 2. Selecionar Paciente -->
     <div class="secao">
       <h2>2. Selecionar Paciente</h2>
       <div class="campo" style="margin-bottom: 0;">
@@ -118,7 +114,6 @@
       </div>
     </div>
 
-    <!-- 3. Cadastrar Avaliação Nutricional -->
     <div class="secao">
       <h2>3. Nova Avaliação Nutricional</h2>
       <form onsubmit="salvarAvaliacao(event)">
@@ -148,7 +143,6 @@
       </form>
     </div>
 
-    <!-- 4. Cadastrar Plano Alimentar -->
     <div class="secao">
       <h2>4. Novo Plano Alimentar</h2>
       <form onsubmit="salvarPlanoAlimentar(event)">
@@ -184,7 +178,6 @@
       </form>
     </div>
 
-    <!-- Histórico recente do paciente selecionado -->
     <div class="secao" id="box-historico-nutri" style="display:none;">
       <h2>Histórico Enviado para este Paciente</h2>
       <div id="lista-historico-nutri"></div>
@@ -193,7 +186,6 @@
     <button class="sair" onclick="fazerLogout()">Sair da Conta</button>
   </div>
 
-  <!-- PAINEL DO PACIENTE -->
   <div class="card oculto" id="painel-paciente">
     <h1>Nutri Inova - Paciente 🥗</h1>
     <p class="subtitulo" id="boas-vindas-paciente">Olá!</p>
@@ -211,278 +203,243 @@
         <p style="color:#64748b; font-size:14px;">Carregando suas avaliações...</p>
       </div>
     </div>
+
     <button class="sair" onclick="fazerLogout()">Sair da Conta</button>
   </div>
 
   <script>
-    const SUPABASE_URL = 'https://fnbcwtmiojqnxplvhyzh.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZuYmN3dG1pb2pxbnhwbHZoeXpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2MjAzMzgsImV4cCI6MjExMDE5NjMzOH0.8QS0HiLeU42kRg9FSjU6aU5elT1EX0d9LlrBcFUZDzE';
+    const SUPABASE_URL = 'https://supabase.co';
+    const SUPABASE_ANON_KEY = 'COLE_SUA_CHAVE_LONGA_AQUI';
 
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let usuarioAtual = null;
 
     function alternarAba(aba) {
       limparAviso();
-      document.getElementById('aba-login').classList.toggle('ativa', aba === 'login');
-      document.getElementById('aba-cadastro').classList.toggle('ativa', aba === 'cadastro');
-      document.getElementById('form-login').classList.toggle('oculto', aba !== 'login');
-      document.getElementById('form-cadastro').classList.toggle('oculto', aba !== 'cadastro');
-    }
-
-    function mostrarAviso(texto, tipo, idElemento = 'mensagem-aviso') {
-      const box = document.getElementById(idElemento);
-      box.textContent = texto;
-      box.className = 'aviso ' + tipo;
-      if (idElemento === 'aviso-nutri') {
-        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }
-
-    function limparAviso() {
-      const box = document.getElementById('mensagem-aviso');
-      box.className = 'aviso';
-      box.textContent = '';
-    }
-
-    async function fazerCadastro(event) {
-      event.preventDefault();
-      limparAviso();
-      const nome = document.getElementById('cad-nome').value.trim();
-      const email = document.getElementById('cad-email').value.trim().toLowerCase();
-      const senha = document.getElementById('cad-senha').value;
-      const perfil = document.getElementById('cad-perfil').value;
-
-      const { data, error } = await supabaseClient.auth.signUp({
-        email,
-        password: senha,
-        options: { data: { full_name: nome, role: perfil } }
-      });
-
-      if (error) {
-        mostrarAviso('Erro ao cadastrar: ' + error.message, 'erro');
-        return;
-      }
-
-      if (data.user) {
-        await supabaseClient.from('profiles').upsert({
-          id: data.user.id,
-          full_name: nome,
-          email: email,
-          role: perfil
-        });
-      }
-
-      if (data.session) {
-        carregarPainel(data.user);
-      } else {
-        mostrarAviso('Cadastro realizado! Verifique seu e-mail ou faça login na aba Entrar.', 'sucesso');
-        alternarAba('login');
-      }
-    }
-
-    async function fazerLogin(event) {
-      event.preventDefault();
-      limparAviso();
-      const email = document.getElementById('login-email').value.trim().toLowerCase();
-      const senha = document.getElementById('login-senha').value;
-
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
-      if (error) {
-        mostrarAviso('Erro ao entrar: ' + error.message, 'erro');
-        return;
-      }
-      carregarPainel(data.user);
-    }
-
-    async function carregarPainel(user) {
-      usuarioAtual = user;
-      let { data: profile } = await supabaseClient
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (!profile) {
-        const meta = user.user_metadata || {};
-        const novoPerfil = {
-          id: user.id,
-          full_name: meta.full_name || user.email.split('@')[0],
-          email: user.email,
-          role: meta.role || 'paciente'
-        };
-        await supabaseClient.from('profiles').upsert(novoPerfil);
-        profile = novoPerfil;
-      }
-
-      document.getElementById('tela-auth').classList.add('oculto');
-
-      if (profile.role === 'nutricionista') {
-        document.getElementById('painel-nutricionista').classList.remove('oculto');
-        document.getElementById('boas-vindas-nutri').textContent = 'Bem-vindo(a), ' + profile.full_name;
-        carregarPacientesVinculados();
-      } else {
-        document.getElementById('painel-paciente').classList.remove('oculto');
-        document.getElementById('boas-vindas-paciente').textContent = 'Olá, ' + profile.full_name + '! Acompanhe seu progresso abaixo.';
-        carregarDadosDoPaciente();
-      }
-    }
-
-    async function vincularPaciente() {
-      const emailInput = document.getElementById('email-vincular');
-      const email = emailInput.value.trim().toLowerCase();
-      if (!email) {
-        mostrarAviso('Digite o e-mail do paciente para vincular.', 'erro', 'aviso-nutri');
-        return;
-      }
-
-      const { data: paciente, error: erroBusca } = await supabaseClient
-        .from('profiles')
-        .select('id, full_name, role')
-        .eq('email', email)
-        .single();
-
-      if (erroBusca || !paciente) {
-        mostrarAviso('Paciente não encontrado. Peça para ele criar uma conta primeiro.', 'erro', 'aviso-nutri');
-        return;
-      }
-
-      if (paciente.id === usuarioAtual.id) {
-        mostrarAviso('Você não pode vincular a si mesmo como paciente.', 'erro', 'aviso-nutri');
-        return;
-      }
-
-      const { error: erroVinculo } = await supabaseClient
-        .from('professional_patient_links')
-        .insert({ nutritionist_id: usuarioAtual.id, patient_id: paciente.id });
-
-      if (erroVinculo) {
-        if (erroVinculo.code === '23505') {
-          mostrarAviso('Este paciente já está vinculado à sua conta.', 'erro', 'aviso-nutri');
-        } else {
-          mostrarAviso('Erro ao vincular: ' + erroVinculo.message, 'erro', 'aviso-nutri');
-        }
-        return;
-      }
-
-      emailInput.value = '';
-      mostrarAviso('Paciente ' + paciente.full_name + ' vinculado(a) com sucesso!', 'sucesso', 'aviso-nutri');
-      carregarPacientesVinculados();
-    }
-
-    async function carregarPacientesVinculados() {
-      const { data: links } = await supabaseClient
-        .from('professional_patient_links')
-        .select('patient_id, profiles!professional_patient_links_patient_id_fkey(id, full_name, email)')
-        .eq('nutritionist_id', usuarioAtual.id);
-
-      const select = document.getElementById('select-paciente');
-      select.innerHTML = '<option value="">-- Selecione um paciente vinculado --</option>';
-
-      if (links && links.length > 0) {
-        links.forEach(item => {
-          if (item.profiles) {
-            const opt = document.createElement('option');
-            opt.value = item.profiles.id;
-            opt.textContent = item.profiles.full_name + ' (' + item.profiles.email + ')';
-            select.appendChild(opt);
-          }
-        });
-      }
-    }
-
-    async function salvarAvaliacao(event) {
-      event.preventDefault();
-      const patientId = document.getElementById('select-paciente').value;
-      if (!patientId) {
-        mostrarAviso('Selecione um paciente no passo 2 antes de salvar a avaliação.', 'erro', 'aviso-nutri');
-        return;
-      }
-
-      const peso = parseFloat(document.getElementById('av-peso').value);
-      const altura = parseFloat(document.getElementById('av-altura').value);
-      const gordura = document.getElementById('av-gordura').value;
-      const meta = document.getElementById('av-meta').value.trim();
-      const obs = document.getElementById('av-obs').value.trim();
-      const imc = (peso / Math.pow(altura / 100, 2)).toFixed(1);
-
-      const { error } = await supabaseClient.from('assessments').insert({
-        patient_id: patientId,
-        nutritionist_id: usuarioAtual.id,
-        data: { peso, altura, imc, gordura, meta, obs }
-      });
-
-      if (error) {
-        mostrarAviso('Erro ao salvar avaliação: ' + error.message, 'erro', 'aviso-nutri');
-        return;
-      }
-
-      event.target.reset();
-      mostrarAviso('Avaliação salva com sucesso! Já está visível na tela do paciente.', 'sucesso', 'aviso-nutri');
-      carregarHistoricoPacienteNutri();
-    }
-
-    async function salvarPlanoAlimentar(event) {
-      event.preventDefault();
-      const patientId = document.getElementById('select-paciente').value;
-      if (!patientId) {
-        mostrarAviso('Selecione um paciente no passo 2 antes de enviar o plano.', 'erro', 'aviso-nutri');
-        return;
-      }
-
-      const planData = {
-        titulo: document.getElementById('plano-titulo').value.trim(),
-        cafe: document.getElementById('plano-cafe').value.trim(),
-        almoco: document.getElementById('plano-almoco').value.trim(),
-        lanche: document.getElementById('plano-lanche').value.trim(),
-        jantar: document.getElementById('plano-jantar').value.trim(),
-        extra: document.getElementById('plano-extra').value.trim()
-      };
-
-      const { error } = await supabaseClient.from('meal_plans').insert({
-        patient_id: patientId,
-        nutritionist_id: usuarioAtual.id,
-        plan_data: planData
-      });
-
-      if (error) {
-        mostrarAviso('Erro ao salvar plano: ' + error.message, 'erro', 'aviso-nutri');
-        return;
-      }
-
-      event.target.reset();
-      mostrarAviso('Plano alimentar enviado com sucesso para o paciente!', 'sucesso', 'aviso-nutri');
-      carregarHistoricoPacienteNutri();
-    }
-
-    async function carregarHistoricoPacienteNutri() {
-      const patientId = document.getElementById('select-paciente').value;
-      const box = document.getElementById('box-historico-nutri');
-      const lista = document.getElementById('lista-historico-nutri');
-
-      if (!patientId) {
-        box.style.display = 'none';
-        return;
-      }
-
-      box.style.display = 'block';
-      lista.innerHTML = '<p style="font-size:13px; color:#64748b;">Carregando histórico...</p>';
-
-      const [{ data: avals }, { data: planos }] = await Promise.all([
-        supabaseClient.from('assessments').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }),
-        supabaseClient.from('meal_plans').select('*').eq('patient_id', patientId).order('created_at', { ascending: false })
-      ]);
-
-      let html = '';
-      if (planos && planos.length > 0) {
-        planos.forEach(p => {
-          const d = p.plan_data || {};
-html += `<div class="item-lista"><span class="badge">Plano Alimentar</span><small>${new Date(p.created_at).toLocaleDateString('pt-BR')}</small><strong>${d.titulo || 'Plano'}</strong></div>;
+document.getElementById('aba-login').classList.toggle('ativa', aba === 'login');
+document.getElementById('aba-cadastro').classList.toggle('ativa', aba === 'cadastro');
+document.getElementById('form-login').classList.toggle('oculto', aba !== 'login');
+document.getElementById('form-cadastro').classList.toggle('oculto', aba !== 'cadastro');
+}
+function mostrarAviso(texto, tipo, idElemento) {
+const box = document.getElementById(idElemento || 'mensagem-aviso');
+box.textContent = texto;
+box.className = 'aviso ' + tipo;
+if (idElemento === 'aviso-nutri') {
+box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+}
+function limparAviso() {
+const box = document.getElementById('mensagem-aviso');
+box.className = 'aviso';
+box.textContent = '';
+}
+async function fazerCadastro(event) {
+event.preventDefault();
+limparAviso();
+const nome = document.getElementById('cad-nome').value.trim();
+const email = document.getElementById('cad-email').value.trim().toLowerCase();
+const senha = document.getElementById('cad-senha').value;
+const perfil = document.getElementById('cad-perfil').value;
+const { data, error } = await supabaseClient.auth.signUp({
+email: email,
+password: senha,
+options: { data: { full_name: nome, role: perfil } }
+});
+if (error) {
+mostrarAviso('Erro ao cadastrar: ' + error.message, 'erro');
+return;
+}
+if (data.user) {
+await supabaseClient.from('profiles').upsert({
+id: data.user.id,
+full_name: nome,
+email: email,
+role: perfil
+});
+}
+if (data.session) {
+carregarPainel(data.user);
+} else {
+mostrarAviso('Cadastro realizado! Verifique seu e-mail ou faça login na aba Entrar.', 'sucesso');
+alternarAba('login');
+}
+}
+async function fazerLogin(event) {
+event.preventDefault();
+limparAviso();
+const email = document.getElementById('login-email').value.trim().toLowerCase();
+const senha = document.getElementById('login-senha').value;
+const { data, error } = await supabaseClient.auth.signInWithPassword({ email: email, password: senha });
+if (error) {
+mostrarAviso('Erro ao entrar: ' + error.message, 'erro');
+return;
+}
+carregarPainel(data.user);
+}
+async function carregarPainel(user) {
+usuarioAtual = user;
+let { data: profile } = await supabaseClient
+.from('profiles')
+.select('*')
+.eq('id', user.id)
+.single();
+if (!profile) {
+const meta = user.user_metadata || {};
+const novoPerfil = {
+id: user.id,
+full_name: meta.full_name || user.email.split('@')[0],
+email: user.email,
+role: meta.role || 'paciente'
+};
+await supabaseClient.from('profiles').upsert(novoPerfil);
+profile = novoPerfil;
+}
+document.getElementById('tela-auth').classList.add('oculto');
+if (profile.role === 'nutricionista') {
+document.getElementById('painel-nutricionista').classList.remove('oculto');
+document.getElementById('boas-vindas-nutri').textContent = 'Bem-vindo(a), ' + profile.full_name;
+carregarPacientesVinculados();
+} else {
+document.getElementById('painel-paciente').classList.remove('oculto');
+document.getElementById('boas-vindas-paciente').textContent = 'Olá, ' + profile.full_name + '! Acompanhe seu progresso abaixo.';
+carregarDadosDoPaciente();
+}
+}
+async function vincularPaciente() {
+const emailInput = document.getElementById('email-vincular');
+const email = emailInput.value.trim().toLowerCase();
+if (!email) {
+mostrarAviso('Digite o e-mail do paciente para vincular.', 'erro', 'aviso-nutri');
+return;
+}
+const { data: paciente, error: erroBusca } = await supabaseClient
+.from('profiles')
+.select('id, full_name, role')
+.eq('email', email)
+.single();
+if (erroBusca || !paciente) {
+mostrarAviso('Paciente não encontrado. Peça para ele criar uma conta primeiro.', 'erro', 'aviso-nutri');
+return;
+}
+if (paciente.id === usuarioAtual.id) {
+mostrarAviso('Você não pode vincular a si mesmo como paciente.', 'erro', 'aviso-nutri');
+return;
+}
+const { error: erroVinculo } = await supabaseClient
+.from('professional_patient_links')
+.insert({ nutritionist_id: usuarioAtual.id, patient_id: paciente.id });
+if (erroVinculo) {
+if (erroVinculo.code === '23505') {
+mostrarAviso('Este paciente já está vinculado à sua conta.', 'erro', 'aviso-nutri');
+} else {
+mostrarAviso('Erro ao vincular: ' + erroVinculo.message, 'erro', 'aviso-nutri');
+}
+return;
+}
+emailInput.value = '';
+mostrarAviso('Paciente ' + paciente.full_name + ' vinculado(a) com sucesso!', 'sucesso', 'aviso-nutri');
+carregarPacientesVinculados();
+}
+async function carregarPacientesVinculados() {
+const { data: links } = await supabaseClient
+.from('professional_patient_links')
+.select('patient_id, profiles!professional_patient_links_patient_id_fkey(id, full_name, email)')
+.eq('nutritionist_id', usuarioAtual.id);
+const select = document.getElementById('select-paciente');
+select.innerHTML = '-- Selecione um paciente vinculado --';
+if (links && links.length > 0) {
+links.forEach(function(item) {
+if (item.profiles) {
+const opt = document.createElement('option');
+opt.value = item.profiles.id;
+opt.textContent = item.profiles.full_name + ' (' + item.profiles.email + ')';
+select.appendChild(opt);
+}
+});
+}
+}
+async function salvarAvaliacao(event) {
+event.preventDefault();
+const patientId = document.getElementById('select-paciente').value;
+if (!patientId) {
+mostrarAviso('Selecione um paciente no passo 2 antes de salvar a avaliação.', 'erro', 'aviso-nutri');
+return;
+}
+const peso = parseFloat(document.getElementById('av-peso').value);
+const altura = parseFloat(document.getElementById('av-altura').value);
+const gordura = document.getElementById('av-gordura').value;
+const meta = document.getElementById('av-meta').value.trim();
+const obs = document.getElementById('av-obs').value.trim();
+const imc = (peso / Math.pow(altura / 100, 2)).toFixed(1);
+const { error } = await supabaseClient.from('assessments').insert({
+patient_id: patientId,
+nutritionist_id: usuarioAtual.id,
+data: { peso: peso, altura: altura, imc: imc, gordura: gordura, meta: meta, obs: obs }
+});
+if (error) {
+mostrarAviso('Erro ao salvar avaliação: ' + error.message, 'erro', 'aviso-nutri');
+return;
+}
+event.target.reset();
+mostrarAviso('Avaliação salva com sucesso! Já está visível na tela do paciente.', 'sucesso', 'aviso-nutri');
+carregarHistoricoPacienteNutri();
+}
+async function salvarPlanoAlimentar(event) {
+event.preventDefault();
+const patientId = document.getElementById('select-paciente').value;
+if (!patientId) {
+mostrarAviso('Selecione um paciente no passo 2 antes de enviar o plano.', 'erro', 'aviso-nutri');
+return;
+}
+const planData = {
+titulo: document.getElementById('plano-titulo').value.trim(),
+cafe: document.getElementById('plano-cafe').value.trim(),
+almoco: document.getElementById('plano-almoco').value.trim(),
+lanche: document.getElementById('plano-lanche').value.trim(),
+jantar: document.getElementById('plano-jantar').value.trim(),
+extra: document.getElementById('plano-extra').value.trim()
+};
+const { error } = await supabaseClient.from('meal_plans').insert({
+patient_id: patientId,
+nutritionist_id: usuarioAtual.id,
+plan_data: planData
+});
+if (error) {
+mostrarAviso('Erro ao salvar plano: ' + error.message, 'erro', 'aviso-nutri');
+return;
+}
+event.target.reset();
+mostrarAviso('Plano alimentar enviado com sucesso para o paciente!', 'sucesso', 'aviso-nutri');
+carregarHistoricoPacienteNutri();
+}
+async function carregarHistoricoPacienteNutri() {
+const patientId = document.getElementById('select-paciente').value;
+const box = document.getElementById('box-historico-nutri');
+const lista = document.getElementById('lista-historico-nutri');
+if (!patientId) {
+box.style.display = 'none';
+return;
+}
+box.style.display = 'block';
+lista.innerHTML = 'Carregando histórico...';
+const [{ data: avals }, { data: planos }] = await Promise.all([
+supabaseClient.from('assessments').select('').eq('patient_id', patientId).order('created_at', { ascending: false }),
+supabaseClient.from('meal_plans').select('').eq('patient_id', patientId).order('created_at', { ascending: false })
+]);
+let html = '';
+if (planos && planos.length > 0) {
+planos.forEach(function(p) {
+const d = p.plan_data || {};
+const dataFormatada = new Date(p.created_at).toLocaleDateString('pt-BR');
+html += 'Plano Alimentar' + dataFormatada + '' + (d.titulo || 'Plano') + '';
 });
 }
 if (avals && avals.length > 0) {
-avals.forEach(a => {
+avals.forEach(function(a) {
 const d = a.data || {};
-html += `<div class="item-lista"><span class="badge">Avaliação</span><small>${new Date(a.created_at).toLocaleDateString('pt-BR')}</small>Peso: <strong>${d.peso} kg</strong> | IMC: <strong>${d.imc}</strong> | Meta: ${d.meta || '-'}</div>`;
+const dataFormatada = new Date(a.created_at).toLocaleDateString('pt-BR');
+html += 'Avaliação' + dataFormatada + 'Peso: ' + d.peso + ' kg | IMC: ' + d.imc + ' | Meta: ' + (d.meta || '-') + '';
 });
 }
 lista.innerHTML = html || 'Nenhum registro enviado para este paciente ainda.';
@@ -494,23 +451,50 @@ supabaseClient.from('assessments').select('').eq('patient_id', usuarioAtual.id).
 ]);
 const divPlanos = document.getElementById('paciente-planos');
 if (planos && planos.length > 0) {
-divPlanos.innerHTML = planos.map(p => {
+divPlanos.innerHTML = planos.map(function(p) {
 const d = p.plan_data || {};
-return <div class="item-lista"> <span class="badge">Enviado em ${new Date(p.created_at).toLocaleDateString('pt-BR')}</span> <h3 style="color:#0f766e; font-size:16px; margin-bottom:8px;">${d.titulo || 'Plano Alimentar'}</h3> <p><strong>☕ Café da Manhã:</strong> ${d.cafe || '-'}</p> <p style="margin-top:6px;"><strong>🍽️ Almoço:</strong> ${d.almoco || '-'}</p> ${d.lanche ?🍎 Lanche da Tarde: ${d.lanche}: ''} <p style="margin-top:6px;"><strong>🥗 Jantar:</strong> ${d.jantar || '-'}</p> ${d.extra ?💧 Hidratação/Suplementos: ${d.extra}: ''} </div>;
+const dataFormatada = new Date(p.created_at).toLocaleDateString('pt-BR');
+let bloco = '';
+bloco += 'Enviado em ' + dataFormatada + '';
+bloco += '' + (d.titulo || 'Plano Alimentar') + '';
+bloco += '☕ Café da Manhã: ' + (d.cafe || '-') + '';
+bloco += '🍽️ Almoço: ' + (d.almoco || '-') + '';
+if (d.lanche) {
+bloco += '🍎 Lanche da Tarde: ' + d.lanche + '';
+}
+bloco += '🥗 Jantar: ' + (d.jantar || '-') + '';
+if (d.extra) {
+bloco += '💧 Hidratação/Suplementos: ' + d.extra + '';
+}
+bloco += '';
+return bloco;
 }).join('');
 } else {
 divPlanos.innerHTML = 'Seu nutricionista ainda não enviou um plano alimentar.';
 }
 const divAvals = document.getElementById('paciente-avaliacoes');
 if (avals && avals.length > 0) {
-divAvals.innerHTML = avals.map(a => {
+divAvals.innerHTML = avals.map(function(a) {
 const d = a.data || {};
-return <div class="item-lista"> <small>Data da Avaliação: ${new Date(a.created_at).toLocaleDateString('pt-BR')}</small> <p><strong>Peso:</strong> ${d.peso} kg &nbsp;|&nbsp; <strong>Altura:</strong> ${d.altura} cm &nbsp;|&nbsp; <strong>IMC:</strong> ${d.imc} ${d.gordura ? |  Gordura: ${d.gordura}%: ''}</p> <p style="margin-top:4px;"><strong>Meta:</strong> ${d.meta || '-'}</p> ${d.obs ?Observações: ${d.obs}: ''} </div>;
+const dataFormatada = new Date(a.created_at).toLocaleDateString('pt-BR');
+let bloco = '';
+bloco += 'Data da Avaliação: ' + dataFormatada + '';
+bloco += 'Peso: ' + d.peso + ' kg  |  Altura: ' + d.altura + ' cm  |  IMC: ' + d.imc;
+if (d.gordura) {
+bloco += '  |  Gordura: ' + d.gordura + '%';
+}
+bloco += '';
+bloco += 'Meta: ' + (d.meta || '-') + '';
+if (d.obs) {
+bloco += 'Observações: ' + d.obs + '';
+}
+bloco += '';
+return bloco;
 }).join('');
 } else {
 divAvals.innerHTML = 'Nenhuma avaliação registrada até o momento.';
 }
-} 
+}
 async function fazerLogout() {
 await supabaseClient.auth.signOut();
 location.reload();
@@ -521,6 +505,3 @@ if (data.session && data.session.user) {
 carregarPainel(data.session.user);
 }
 };
-</script>
-</body>
-</html>
