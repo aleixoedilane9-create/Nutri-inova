@@ -1,93 +1,195 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nutri Inova - Acesso ao Sistema</title>
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nutri Inova - Ecossistema Nutricional</title>
+  <script src="https://unpkg.com"></script>
   <style>
-    * { box-sizing: border-box; font-family: Arial, sans-serif; margin: 0; padding: 0; }
-    body { background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-    .card { background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 420px; }
-    h1 { color: #2e7d32; font-size: 22px; margin-bottom: 8px; text-align: center; }
-    p.subtitulo { color: #666; font-size: 14px; text-align: center; margin-bottom: 20px; }
-    .abas { display: flex; margin-bottom: 20px; border-bottom: 2px solid #eee; }
-    .aba { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-weight: bold; color: #777; }
-    .aba.ativa { color: #2e7d32; border-bottom: 2px solid #2e7d32; }
-    .campo { margin-bottom: 15px; }
-    label { display: block; font-size: 13px; color: #333; margin-bottom: 5px; font-weight: bold; }
-    input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-    button { width: 100%; padding: 12px; background-color: #2e7d32; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-    button:hover { background-color: #1b5e20; }
-    button.sair { background-color: #c62828; margin-top: 20px; }
-    button.sair:hover { background-color: #8e0000; }
-    .mensagem { margin-top: 15px; padding: 10px; border-radius: 6px; font-size: 13px; text-align: center; display: none; }
-    .erro { background-color: #ffebee; color: #c62828; display: block; }
-    .sucesso { background-color: #e8f5e9; color: #2e7d32; display: block; }
+    * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; }
+    body { background-color: #f0f4f8; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 24px 16px; color: #1e293b; }
+    .card { background: #ffffff; padding: 28px; border-radius: 14px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); width: 100%; max-width: 720px; }
+    .card-login { max-width: 440px; margin-top: 30px; }
+    h1 { color: #0f766e; font-size: 24px; margin-bottom: 6px; text-align: center; }
+    h2 { color: #0f766e; font-size: 18px; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; }
+    .subtitulo { color: #64748b; font-size: 14px; text-align: center; margin-bottom: 20px; }
+    .abas { display: flex; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
+    .aba { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-weight: 600; color: #64748b; }
+    .aba.ativa { color: #0f766e; border-bottom: 2px solid #0f766e; }
+    .campo { margin-bottom: 14px; }
+    label { display: block; font-size: 13px; color: #334155; margin-bottom: 5px; font-weight: 600; }
+    input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #fff; }
+    textarea { resize: vertical; min-height: 85px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    button { width: 100%; padding: 12px; background-color: #0f766e; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    button:hover { background-color: #115e59; }
+    button.secundario { background-color: #0284c7; }
+    button.secundario:hover { background-color: #0369a1; }
+    button.sair { background-color: #dc2626; margin-top: 24px; }
+    button.sair:hover { background-color: #b91c1c; }
+    .aviso { margin-top: 14px; padding: 12px; border-radius: 8px; font-size: 13px; text-align: center; display: none; font-weight: 500; }
+    .aviso.erro { background-color: #fee2e2; color: #991b1b; display: block; }
+    .aviso.sucesso { background-color: #dcfce7; color: #166534; display: block; }
+    .secao { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; margin-bottom: 20px; }
+    .item-lista { background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #0f766e; padding: 12px 14px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; line-height: 1.5; }
+    .item-lista small { color: #64748b; display: block; margin-bottom: 4px; }
+    .badge { display: inline-block; background: #ccfbf1; color: #0f766e; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; margin-bottom: 8px; }
     .oculto { display: none; }
-    .painel-box { background: #e8f5e9; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #2e7d32; font-size: 14px; line-height: 1.5; }
+    @media (max-width: 600px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
 
-  <!-- TELA DE LOGIN E CADASTRO -->
-  <div class="card" id="tela-acesso">
-    <h1>Nutri Inova 🌱</h1>
-    <p class="subtitulo">Acesso seguro para nutricionistas e pacientes</p>
+  <!-- TELA DE LOGIN / CADASTRO -->
+  <div class="card card-login" id="tela-auth">
+    <h1>Nutri Inova 🥗</h1>
+    <p class="subtitulo">Avaliação e acompanhamento nutricional em tempo real</p>
 
     <div class="abas">
       <div class="aba ativa" id="aba-login" onclick="alternarAba('login')">Entrar</div>
       <div class="aba" id="aba-cadastro" onclick="alternarAba('cadastro')">Criar Conta</div>
     </div>
 
-    <!-- FORMULÁRIO DE LOGIN -->
     <form id="form-login" onsubmit="fazerLogin(event)">
       <div class="campo">
         <label>E-mail</label>
-        <input type="email" id="login-email" required placeholder="seu@email.com">
+        <input type="email" id="login-email" placeholder="seu@email.com" required />
       </div>
       <div class="campo">
         <label>Senha</label>
-        <input type="password" id="login-senha" required placeholder="••••••••">
+        <input type="password" id="login-senha" placeholder="Sua senha" required />
       </div>
       <button type="submit">Entrar no Sistema</button>
     </form>
 
-    <!-- FORMULÁRIO DE CADASTRO -->
     <form id="form-cadastro" class="oculto" onsubmit="fazerCadastro(event)">
       <div class="campo">
         <label>Nome Completo</label>
-        <input type="text" id="cad-nome" required placeholder="Ex: Dra. Ana Silva">
-      </div>
-      <div class="campo">
-        <label>Tipo de Acesso</label>
-        <select id="cad-role" required>
-          <option value="patient">Sou Paciente</option>
-          <option value="nutritionist">Sou Nutricionista</option>
-        </select>
+        <input type="text" id="cad-nome" placeholder="Ex: Maria Silva" required />
       </div>
       <div class="campo">
         <label>E-mail</label>
-        <input type="email" id="cad-email" required placeholder="seu@email.com">
+        <input type="email" id="cad-email" placeholder="seu@email.com" required />
       </div>
       <div class="campo">
         <label>Senha (mínimo 6 caracteres)</label>
-        <input type="password" id="cad-senha" required minlength="6" placeholder="••••••••">
+        <input type="password" id="cad-senha" minlength="6" placeholder="Crie uma senha" required />
+      </div>
+      <div class="campo">
+        <label>Tipo de Perfil</label>
+        <select id="cad-perfil" required>
+          <option value="paciente">Sou Paciente</option>
+          <option value="nutricionista">Sou Nutricionista</option>
+        </select>
       </div>
       <button type="submit">Finalizar Cadastro</button>
     </form>
 
-    <div id="aviso" class="mensagem"></div>
+    <div id="mensagem-aviso" class="aviso"></div>
   </div>
 
   <!-- PAINEL DO NUTRICIONISTA -->
   <div class="card oculto" id="painel-nutricionista">
     <h1>Nutri Inova - Profissional 🩺</h1>
-    <p class="subtitulo" id="boas-vindas-nutri">Olá!</p>
-    <div class="painel-box">
-      <strong>Perfil: Nutricionista</strong><br>
-      Base conectada! Na próxima etapa vamos ativar aqui o vínculo com pacientes, avaliações e planos alimentares.
+    <p class="subtitulo" id="boas-vindas-nutri">Bem-vindo(a)!</p>
+    <div id="aviso-nutri" class="aviso" style="margin-bottom: 16px;"></div>
+
+    <!-- 1. Vincular Paciente -->
+    <div class="secao">
+      <h2>1. Vincular Novo Paciente</h2>
+      <div class="grid-2" style="align-items: end;">
+        <div class="campo" style="margin-bottom: 0;">
+          <label>E-mail do Paciente cadastrado no sistema</label>
+          <input type="email" id="email-vincular" placeholder="paciente@email.com" />
+        </div>
+        <button type="button" class="secundario" onclick="vincularPaciente()">Vincular Paciente</button>
+      </div>
     </div>
+
+    <!-- 2. Selecionar Paciente -->
+    <div class="secao">
+      <h2>2. Selecionar Paciente</h2>
+      <div class="campo" style="margin-bottom: 0;">
+        <label>Escolha o paciente para registrar avaliação ou plano</label>
+        <select id="select-paciente" onchange="carregarHistoricoPacienteNutri()">
+          <option value="">-- Selecione um paciente vinculado --</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 3. Cadastrar Avaliação Nutricional -->
+    <div class="secao">
+      <h2>3. Nova Avaliação Nutricional</h2>
+      <form onsubmit="salvarAvaliacao(event)">
+        <div class="grid-3">
+          <div class="campo">
+            <label>Peso (kg)</label>
+            <input type="number" step="0.1" id="av-peso" placeholder="Ex: 68.5" required />
+          </div>
+          <div class="campo">
+            <label>Altura (cm)</label>
+            <input type="number" id="av-altura" placeholder="Ex: 165" required />
+          </div>
+          <div class="campo">
+            <label>% Gordura (opcional)</label>
+            <input type="number" step="0.1" id="av-gordura" placeholder="Ex: 24.0" />
+          </div>
+        </div>
+        <div class="campo">
+          <label>Meta Principal</label>
+          <input type="text" id="av-meta" placeholder="Ex: Reeducação alimentar e redução de medidas" required />
+        </div>
+        <div class="campo">
+          <label>Observações Clínicas</label>
+          <textarea id="av-obs" placeholder="Anote medidas, exames ou orientações gerais da consulta..."></textarea>
+        </div>
+        <button type="submit">Salvar Avaliação</button>
+      </form>
+    </div>
+
+    <!-- 4. Cadastrar Plano Alimentar -->
+    <div class="secao">
+      <h2>4. Novo Plano Alimentar</h2>
+      <form onsubmit="salvarPlanoAlimentar(event)">
+        <div class="campo">
+          <label>Título / Objetivo do Plano</label>
+          <input type="text" id="plano-titulo" placeholder="Ex: Plano Fase 1 - Desinflamação e Energia" required />
+        </div>
+        <div class="grid-2">
+          <div class="campo">
+            <label>Café da Manhã</label>
+            <textarea id="plano-cafe" placeholder="Opções e quantidades..." required></textarea>
+          </div>
+          <div class="campo">
+            <label>Almoço</label>
+            <textarea id="plano-almoco" placeholder="Opções e quantidades..." required></textarea>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="campo">
+            <label>Lanche da Tarde</label>
+            <textarea id="plano-lanche" placeholder="Opções e quantidades..."></textarea>
+          </div>
+          <div class="campo">
+            <label>Jantar / Ceia</label>
+            <textarea id="plano-jantar" placeholder="Opções e quantidades..." required></textarea>
+          </div>
+        </div>
+        <div class="campo">
+          <label>Hidratação e Suplementação</label>
+          <input type="text" id="plano-extra" placeholder="Ex: 2,5L de água/dia + Ômega 3 após almoço" />
+        </div>
+        <button type="submit">Enviar Plano para o Paciente</button>
+      </form>
+    </div>
+
+    <!-- Histórico recente do paciente selecionado -->
+    <div class="secao" id="box-historico-nutri" style="display:none;">
+      <h2>Histórico Enviado para este Paciente</h2>
+      <div id="lista-historico-nutri"></div>
+    </div>
+
     <button class="sair" onclick="fazerLogout()">Sair da Conta</button>
   </div>
 
@@ -95,66 +197,64 @@
   <div class="card oculto" id="painel-paciente">
     <h1>Nutri Inova - Paciente 🥗</h1>
     <p class="subtitulo" id="boas-vindas-paciente">Olá!</p>
-    <div class="painel-box">
-      <strong>Perfil: Paciente</strong><br>
-      Base conectada! Na próxima etapa você poderá ver aqui suas avaliações nutricionais e seu plano alimentar.
+
+    <div class="secao">
+      <h2>Meu Plano Alimentar Atual</h2>
+      <div id="paciente-planos">
+        <p style="color:#64748b; font-size:14px;">Carregando seu plano alimentar...</p>
+      </div>
     </div>
-    <button class="sair" onclick="fazerLogout()">Sair da Conta</button>
+
+    <div class="secao">
+      <h2>Minhas Avaliações Nutricionais</h2>
+      <div id="paciente-avaliacoes">
+        <p style="color:#64748b; font-size:14px;">Carregando suas avaliações...</p>
+      </div>
+    </div><button class="sair" onclick="fazerLogout()">Sair da Conta</button>
   </div>
-<script>
-  const SUPABASE_URL = 'https://fnbcwtmiojqnxplvhyzh.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZuYmN3dG1pb2pxbnhwbHZoeXpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2MjAzMzgsImV4cCI6MjExMDE5NjMzOH0.8QS0HiLeU42kRg9FSjU6aU5elT1EX0d9LlrBcFUZDzE';  let supabaseClient = null;
-    if (window.supabase) {
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
+
+  <script>
+    const SUPABASE_URL = 'https://fnbcwtmiojqnxplvhyzh.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZuYmN3dG1pb2pxbnhwbHZoeXpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2MjAzMzgsImV4cCI6MjExMDE5NjMzOH0.8QS0HiLeU42kRg9FSjU6aU5elT1EX0d9LlrBcFUZDzE';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let usuarioAtual = null;
 
     function alternarAba(aba) {
       limparAviso();
-      if (aba === 'login') {
-        document.getElementById('aba-login').classList.add('ativa');
-        document.getElementById('aba-cadastro').classList.remove('ativa');
-        document.getElementById('form-login').classList.remove('oculto');
-        document.getElementById('form-cadastro').classList.add('oculto');
-      } else {
-        document.getElementById('aba-cadastro').classList.add('ativa');
-        document.getElementById('aba-login').classList.remove('ativa');
-        document.getElementById('form-cadastro').classList.remove('oculto');
-        document.getElementById('form-login').classList.add('oculto');
+      document.getElementById('aba-login').classList.toggle('ativa', aba === 'login');
+      document.getElementById('aba-cadastro').classList.toggle('ativa', aba === 'cadastro');
+      document.getElementById('form-login').classList.toggle('oculto', aba !== 'login');
+      document.getElementById('form-cadastro').classList.toggle('oculto', aba !== 'cadastro');
+    }
+
+    function mostrarAviso(texto, tipo, idElemento = 'mensagem-aviso') {
+      const box = document.getElementById(idElemento);
+      box.textContent = texto;
+      box.className = 'aviso ' + tipo;
+      if (idElemento === 'aviso-nutri') {
+        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
 
-    function mostrarAviso(texto, tipo) {
-      const aviso = document.getElementById('aviso');
-      aviso.textContent = texto;
-      aviso.className = 'mensagem ' + tipo;
-    }
-
     function limparAviso() {
-      const aviso = document.getElementById('aviso');
-      aviso.className = 'mensagem';
-      aviso.textContent = '';
+      const box = document.getElementById('mensagem-aviso');
+      box.className = 'aviso';
+      box.textContent = '';
     }
 
     async function fazerCadastro(event) {
       event.preventDefault();
       limparAviso();
-
-      if (!supabaseClient) {
-        mostrarAviso('Biblioteca do Supabase não carregou. Verifique sua internet e atualize (F5).', 'erro');
-        return;
-      }
-
-      const fullName = document.getElementById('cad-nome').value;
-      const role = document.getElementById('cad-role').value;
-      const email = document.getElementById('cad-email').value;
-      const password = document.getElementById('cad-senha').value;
+      const nome = document.getElementById('cad-nome').value.trim();
+      const email = document.getElementById('cad-email').value.trim().toLowerCase();
+      const senha = document.getElementById('cad-senha').value;
+      const perfil = document.getElementById('cad-perfil').value;
 
       const { data, error } = await supabaseClient.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-          data: { full_name: fullName, role: role }
-        }
+        email,
+        password: senha,
+        options: { data: { full_name: nome, role: perfil } }
       });
 
       if (error) {
@@ -163,88 +263,263 @@
       }
 
       if (data.user) {
-        const { error: profileError } = await supabaseClient
-          .from('profiles')
-          .insert([{ id: data.user.id, full_name: fullName, role: role }]);
-
-        if (profileError) {
-          console.warn('Aviso ao gravar em profiles:', profileError.message);
-        }
+        await supabaseClient.from('profiles').upsert({
+          id: data.user.id,
+          full_name: nome,
+          email: email,
+          role: perfil
+        });
       }
 
-      mostrarAviso('Conta criada com sucesso! Verifique seu e-mail ou faça login na aba Entrar.', 'sucesso');
-      document.getElementById('form-cadastro').reset();
+      if (data.session) {
+        carregarPainel(data.user);
+      } else {
+        mostrarAviso('Cadastro realizado! Verifique seu e-mail ou faça login na aba Entrar.', 'sucesso');
+        alternarAba('login');
+      }
     }
 
     async function fazerLogin(event) {
       event.preventDefault();
       limparAviso();
+      const email = document.getElementById('login-email').value.trim().toLowerCase();
+      const senha = document.getElementById('login-senha').value;
 
-      if (!supabaseClient) {
-        mostrarAviso('Biblioteca do Supabase não carregou. Verifique sua internet e atualize (F5).', 'erro');
-        return;
-      }
-
-      const email = document.getElementById('login-email').value;
-      const password = document.getElementById('login-senha').value;
-
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
-
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
       if (error) {
         mostrarAviso('Erro ao entrar: ' + error.message, 'erro');
         return;
       }
-
-      direcionarUsuario(data.user);
+      carregarPainel(data.user);
     }
 
-    async function direcionarUsuario(user) {
-      let role = user.user_metadata?.role || 'patient';
-      let fullName = user.user_metadata?.full_name || user.email;
-
-      const { data: profile } = await supabaseClient
+    async function carregarPainel(user) {
+      usuarioAtual = user;
+      let { data: profile } = await supabaseClient
         .from('profiles')
-        .select('full_name, role')
+        .select('*')
         .eq('id', user.id)
         .single();
 
-      if (profile) {
-        role = profile.role;
-        fullName = profile.full_name || fullName;
+      if (!profile) {
+        const meta = user.user_metadata || {};
+        const novoPerfil = {
+          id: user.id,
+          full_name: meta.full_name || user.email.split('@')[0],
+          email: user.email,
+          role: meta.role || 'paciente'
+        };
+        await supabaseClient.from('profiles').upsert(novoPerfil);
+        profile = novoPerfil;
       }
 
-      document.getElementById('tela-acesso').classList.add('oculto');
+      document.getElementById('tela-auth').classList.add('oculto');
 
-      if (role === 'nutritionist') {
-        document.getElementById('boas-vindas-nutri').textContent = 'Bem-vindo(a), ' + fullName;
+      if (profile.role === 'nutricionista') {
         document.getElementById('painel-nutricionista').classList.remove('oculto');
+        document.getElementById('boas-vindas-nutri').textContent = 'Bem-vindo(a), ' + profile.full_name;
+        carregarPacientesVinculados();
       } else {
-        document.getElementById('boas-vindas-paciente').textContent = 'Bem-vindo(a), ' + fullName;
         document.getElementById('painel-paciente').classList.remove('oculto');
+        document.getElementById('boas-vindas-paciente').textContent = 'Olá, ' + profile.full_name + '! Acompanhe seu progresso abaixo.';
+        carregarDadosDoPaciente();
       }
     }
 
-    async function fazerLogout() {
-      if (supabaseClient) {
-        await supabaseClient.auth.signOut();
+    async function vincularPaciente() {
+      const emailInput = document.getElementById('email-vincular');
+      const email = emailInput.value.trim().toLowerCase();
+      if (!email) {
+        mostrarAviso('Digite o e-mail do paciente para vincular.', 'erro', 'aviso-nutri');
+        return;
       }
-      document.getElementById('painel-nutricionista').classList.add('oculto');
-      document.getElementById('painel-paciente').classList.add('oculto');
-      document.getElementById('tela-acesso').classList.remove('oculto');
-      document.getElementById('form-login').reset();
-      limparAviso();
+
+      const { data: paciente, error: erroBusca } = await supabaseClient
+        .from('profiles')
+        .select('id, full_name, role')
+        .eq('email', email)
+        .single();
+
+      if (erroBusca || !paciente) {
+        mostrarAviso('Paciente não encontrado. Peça para ele criar uma conta primeiro.', 'erro', 'aviso-nutri');
+        return;
+      }
+
+      if (paciente.id === usuarioAtual.id) {
+        mostrarAviso('Você não pode vincular a si mesmo como paciente.', 'erro', 'aviso-nutri');
+        return;
+      }
+
+      const { error: erroVinculo } = await supabaseClient
+        .from('professional_patient_links')
+        .insert({ nutritionist_id: usuarioAtual.id, patient_id: paciente.id });
+
+      if (erroVinculo) {
+        if (erroVinculo.code === '23505') {
+          mostrarAviso('Este paciente já está vinculado à sua conta.', 'erro', 'aviso-nutri');
+        } else {
+          mostrarAviso('Erro ao vincular: ' + erroVinculo.message, 'erro', 'aviso-nutri');
+        }
+        return;
+      }
+
+      emailInput.value = '';
+      mostrarAviso('Paciente ' + paciente.full_name + ' vinculado(a) com sucesso!', 'sucesso', 'aviso-nutri');
+      carregarPacientesVinculados();
     }
 
-    window.onload = async () => {
-      if (!supabaseClient) return;
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      if (session && session.user) {
-        direcionarUsuario(session.user);
+    async function carregarPacientesVinculados() {
+      const { data: links } = await supabaseClient
+        .from('professional_patient_links')
+        .select('patient_id, profiles!professional_patient_links_patient_id_fkey(id, full_name, email)')
+        .eq('nutritionist_id', usuarioAtual.id);
+
+      const select = document.getElementById('select-paciente');
+      select.innerHTML = '<option value="">-- Selecione um paciente vinculado --</option>';
+
+      if (links && links.length > 0) {
+        links.forEach(item => {
+          if (item.profiles) {
+            const opt = document.createElement('option');
+            opt.value = item.profiles.id;
+            opt.textContent = item.profiles.full_name + ' (' + item.profiles.email + ')';
+            select.appendChild(opt);
+          }
+        });
       }
-    };
-  </script>
+    }
+
+    async function salvarAvaliacao(event) {
+      event.preventDefault();
+      const patientId = document.getElementById('select-paciente').value;
+      if (!patientId) {
+        mostrarAviso('Selecione um paciente no passo 2 antes de salvar a avaliação.', 'erro', 'aviso-nutri');
+        return;
+      }
+
+      const peso = parseFloat(document.getElementById('av-peso').value);
+      const altura = parseFloat(document.getElementById('av-altura').value);
+      const gordura = document.getElementById('av-gordura').value;
+      const meta = document.getElementById('av-meta').value.trim();
+      const obs = document.getElementById('av-obs').value.trim();
+      const imc = (peso / Math.pow(altura / 100, 2)).toFixed(1);
+
+      const { error } = await supabaseClient.from('assessments').insert({
+        patient_id: patientId,
+        nutritionist_id: usuarioAtual.id,
+        data: { peso, altura, imc, gordura, meta, obs }
+      });
+
+      if (error) {
+        mostrarAviso('Erro ao salvar avaliação: ' + error.message, 'erro', 'aviso-nutri');
+        return;
+      }
+
+      event.target.reset();
+      mostrarAviso('Avaliação salva com sucesso! Já está visível na tela do paciente.', 'sucesso', 'aviso-nutri');
+      carregarHistoricoPacienteNutri();
+    }
+
+    async function salvarPlanoAlimentar(event) {
+      event.preventDefault();
+      const patientId = document.getElementById('select-paciente').value;
+      if (!patientId) {
+        mostrarAviso('Selecione um paciente no passo 2 antes de enviar o plano.', 'erro', 'aviso-nutri');
+        return;
+      }
+
+      const planData = {
+        titulo: document.getElementById('plano-titulo').value.trim(),
+        cafe: document.getElementById('plano-cafe').value.trim(),
+        almoco: document.getElementById('plano-almoco').value.trim(),
+        lanche: document.getElementById('plano-lanche').value.trim(),
+        jantar: document.getElementById('plano-jantar').value.trim(),
+        extra: document.getElementById('plano-extra').value.trim()
+      };
+
+      const { error } = await supabaseClient.from('meal_plans').insert({
+        patient_id: patientId,
+        nutritionist_id: usuarioAtual.id,
+        plan_data: planData
+      });
+
+      if (error) {
+        mostrarAviso('Erro ao salvar plano: ' + error.message, 'erro', 'aviso-nutri');
+        return;
+      }
+
+      event.target.reset();
+      mostrarAviso('Plano alimentar enviado com sucesso para o paciente!', 'sucesso', 'aviso-nutri');
+      carregarHistoricoPacienteNutri();
+    }
+
+    async function carregarHistoricoPacienteNutri() {
+      const patientId = document.getElementById('select-paciente').value;
+      const box = document.getElementById('box-historico-nutri');
+      const lista = document.getElementById('lista-historico-nutri');
+
+      if (!patientId) {
+        box.style.display = 'none';
+        return;
+      }
+
+      box.style.display = 'block';
+      lista.innerHTML = '<p style="font-size:13px; color:#64748b;">Carregando histórico...</p>';
+
+      const [{ data: avals }, { data: planos }] = await Promise.all([
+        supabaseClient.from('assessments').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }),
+        supabaseClient.from('meal_plans').select('*').eq('patient_id', patientId).order('created_at', { ascending: false })
+      ]);
+
+      let html = '';
+      if (planos && planos.length > 0) {
+        planos.forEach(p => {
+          const d = p.plan_data || {};
+html += <div class="item-lista"><span class="badge">Plano Alimentar</span><small>${new Date(p.created_at).toLocaleDateString('pt-BR')}</small><strong>${d.titulo || 'Plano'}</strong></div>;
+});
+}
+if (avals && avals.length > 0) {
+avals.forEach(a => {
+const d = a.data || {};
+html += <div class="item-lista"><span class="badge">Avaliação</span><small>${new Date(a.created_at).toLocaleDateString('pt-BR')}</small>Peso: <strong>${d.peso} kg</strong> | IMC: <strong>${d.imc}</strong> | Meta: ${d.meta || '-'}</div>;
+});
+}
+lista.innerHTML = html || 'Nenhum registro enviado para este paciente ainda.';
+}
+async function carregarDadosDoPaciente() {
+const [{ data: planos }, { data: avals }] = await Promise.all([
+supabaseClient.from('meal_plans').select('').eq('patient_id', usuarioAtual.id).order('created_at', { ascending: false }),
+supabaseClient.from('assessments').select('').eq('patient_id', usuarioAtual.id).order('created_at', { ascending: false })
+]);
+const divPlanos = document.getElementById('paciente-planos');
+if (planos && planos.length > 0) {
+divPlanos.innerHTML = planos.map(p => {
+const d = p.plan_data || {};
+return <div class="item-lista"> <span class="badge">Enviado em ${new Date(p.created_at).toLocaleDateString('pt-BR')}</span> <h3 style="color:#0f766e; font-size:16px; margin-bottom:8px;">${d.titulo || 'Plano Alimentar'}</h3> <p><strong>☕ Café da Manhã:</strong> ${d.cafe || '-'}</p> <p style="margin-top:6px;"><strong>🍽️ Almoço:</strong> ${d.almoco || '-'}</p> ${d.lanche ?🍎 Lanche da Tarde: ${d.lanche}: ''} <p style="margin-top:6px;"><strong>🥗 Jantar:</strong> ${d.jantar || '-'}</p> ${d.extra ?💧 Hidratação/Suplementos: ${d.extra}: ''} </div>;
+}).join('');
+} else {
+divPlanos.innerHTML = 'Seu nutricionista ainda não enviou um plano alimentar.';
+}
+const divAvals = document.getElementById('paciente-avaliacoes');
+if (avals && avals.length > 0) {
+divAvals.innerHTML = avals.map(a => {
+const d = a.data || {};
+return <div class="item-lista"> <small>Data da Avaliação: ${new Date(a.created_at).toLocaleDateString('pt-BR')}</small> <p><strong>Peso:</strong> ${d.peso} kg &nbsp;|&nbsp; <strong>Altura:</strong> ${d.altura} cm &nbsp;|&nbsp; <strong>IMC:</strong> ${d.imc} ${d.gordura ? |  Gordura: ${d.gordura}%: ''}</p> <p style="margin-top:4px;"><strong>Meta:</strong> ${d.meta || '-'}</p> ${d.obs ?Observações: ${d.obs}: ''} </div>;
+}).join('');
+} else {
+divAvals.innerHTML = 'Nenhuma avaliação registrada até o momento.';
+}
+} 
+async function fazerLogout() {
+await supabaseClient.auth.signOut();
+location.reload();
+}
+window.onload = async function() {
+const { data } = await supabaseClient.auth.getSession();
+if (data.session && data.session.user) {
+carregarPainel(data.session.user);
+}
+};
+</script>
 </body>
 </html>
