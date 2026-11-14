@@ -476,13 +476,13 @@
       if (planos && planos.length > 0) {
         planos.forEach(p => {
           const d = p.plan_data || {};
-html += <div class="item-lista"><span class="badge">Plano Alimentar</span><small>${new Date(p.created_at).toLocaleDateString('pt-BR')}</small><strong>${d.titulo || 'Plano'}</strong></div>;
+html += `<div class="item-lista"><span class="badge">Plano Alimentar</span><small>${new Date(p.created_at).toLocaleDateString('pt-BR')}</small><strong>${d.titulo || 'Plano'}</strong></div>;
 });
 }
 if (avals && avals.length > 0) {
 avals.forEach(a => {
 const d = a.data || {};
-html += <div class="item-lista"><span class="badge">Avaliação</span><small>${new Date(a.created_at).toLocaleDateString('pt-BR')}</small>Peso: <strong>${d.peso} kg</strong> | IMC: <strong>${d.imc}</strong> | Meta: ${d.meta || '-'}</div>;
+html += `<div class="item-lista"><span class="badge">Avaliação</span><small>${new Date(a.created_at).toLocaleDateString('pt-BR')}</small>Peso: <strong>${d.peso} kg</strong> | IMC: <strong>${d.imc}</strong> | Meta: ${d.meta || '-'}</div>;
 });
 }
 lista.innerHTML = html || 'Nenhum registro enviado para este paciente ainda.';
