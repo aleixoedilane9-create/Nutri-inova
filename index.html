@@ -296,7 +296,7 @@ await supabaseClient.from('profiles').upsert(novoPerfil);
 profile = novoPerfil;
 }
 document.getElementById('tela-auth').classList.add('oculto');
-if (profile.role === 'nutricionista') {
+if (profile.role?.toLowerCase() === 'nutritionist' || profile.role?.toLowerCase() === 'nutricionosta') {
 document.getElementById('painel-nutricionista').classList.remove('oculto');
 document.getElementById('boas-vindas-nutri').textContent = 'Bem-vindo(a), ' + profile.full_name;
 carregarPacientesVinculados();
