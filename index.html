@@ -543,7 +543,7 @@ async function registrarEvolucao() {
   .eq('id', usuarioAtual.id)
   .single();
   
-  const { data: vinculo, error: errorVinculo } = await supabaseClient
+  const { data: vinculo, error: erroVinculo } = await supabaseClient
   .from('professional_patient_links')
   .select('nutritionist_id')
   .eq('patient_id', usuarioAtual.id)
@@ -551,7 +551,7 @@ async function registrarEvolucao() {
   .maybeSingle();
     
     if (erroVinculo || !vinculo) {
-      alert('Não foi possível lovalizar o nutricionista vinculado.');
+      alert('Não foi possível localizar o nutricionista vinculado.');
       return;
     }
 
