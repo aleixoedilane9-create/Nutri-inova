@@ -543,13 +543,14 @@ async function registrarEvolucao() {
   .eq('id', usuarioAtual.id)
   .single();
   
-  const { data: vinculo } = error: errorVinculo } = await supabaseClientt
+  const { data: vinculo } = error: errorVinculo } = await supabaseClient
   .from('professional_patient_links')
   .select('nutritionist_id')
   .eq('patient_id', usuarioAtual.id)
   .limit(1)
   .maybeSingle();
-    in (erroVinculo || !vinculo) {
+    
+    if (erroVinculo || !vinculo) {
       alert('Não foi possível lovalizar o nutricionista vinculado.');
       return;
     }
@@ -569,8 +570,8 @@ async function registrarEvolucao() {
   }
   
   alert('Evolução registrada com sucesso!');
-  document.getElementById('peso-evolucao').valeu = '';
-  document.getElementById('observacoes-evolucao').valeu = '';
+  document.getElementById('peso-evolucao').value = '';
+  document.getElementById('observacoes-evolucao').value = '';
   await carregarHistoricoEvolucao();
         
   }
