@@ -529,8 +529,8 @@ carregarPainel(data.session.user);
 };
     
 async function registrarEvolucao() {
-  const peso = Number(document.getElementbyId('peso-evolucao').value);
-  const observacoes = document.getElementById('observacoes-evolucao').value);
+  const peso = Number(document.getElementById('peso-evolucao').value);
+  const observacoes = document.getElementById('observacoes-evolucao').value;
   
   if (!peso || peso <= 0) {
     alert('informe um peso válido.');
