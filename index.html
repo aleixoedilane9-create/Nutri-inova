@@ -189,6 +189,27 @@
   <div class="card oculto" id="painel-paciente">
     <h1>Nutri Inova - Paciente 🥗</h1>
     <p class="subtitulo" id="boas-vindas-paciente">Olá!</p>
+    <div class="card'>
+      <h2>meu acompanhamento nutricional</h2>
+      <p>Registre seu peso e acompanhe sua evolução.</p>
+
+      <label for="peso-evolucao">Peso atual (kg)</label>
+      <input type="number" id="peso-evolucao" step="0.1" placeholder="Ex.: 65.5">
+
+      <label for="observacoes-evolucao">Observações</label>
+      <textarea id="observacoes-evolucao" placeholder="como foi sua semana?"></textarea>
+
+      <button onclick="registrarEvolucao()">
+        Registrar minha evolução
+      </button>
+    </div>
+
+    <div class="card">
+      <h2>Meu historico de evolução</h2>
+      <div id="historico-evoulucao">
+        <p>Seus regisros aparecerão aqui.</p>
+      </div>
+    </div>
 
     <div class="secao">
       <h2>Meu Plano Alimentar Atual</h2>
@@ -304,6 +325,7 @@ carregarPacientesVinculados();
 document.getElementById('painel-paciente').classList.remove('oculto');
 document.getElementById('boas-vindas-paciente').textContent = 'Olá, ' + profile.full_name + '! Acompanhe seu progresso abaixo.';
 carregarDadosDoPaciente();
+  carregarHistoricoEvolucao();
 }
 }
 async function vincularPaciente() {
@@ -505,6 +527,77 @@ if (data.session && data.session.user) {
 carregarPainel(data.session.user);
 }
 };
+    
+async function registrarevolucao() {
+  const peso = Number(document.getElementbyId('peso-evolucao').value);
+  const observacoes = document.getElementById('observacoes-evolucao').value);
+  
+  if (!peso || peso <= 0) {
+    alert('informe um peso válido.');
+    return;
+  }
+  
+  const { data: profile } = await supabaseClient
+  .from('profiles')
+  .select('id')
+  .eq('id', usuarioAtual.id)
+  .single();
+  
+  const { data: vinculo } = await supabaseClientt
+  .from('profissional_patient_links')
+  .select('nutritionist_id')
+  .eq('patient_id', usuarioAtual.id)
+  .limit(1)
+  .single();
+
+  const { error } = await supabaseClient
+  .from('progress_record')
+  .insert({
+    patient_id: usuarioAtual.id,
+    nutritionist_id: vinculo?.nutritionist_id || null,
+    weight: peso,
+    notes: observacoes
+  });
+
+  if (error) {
+    alert('Erro ao registrar evolucao: ' + error.message);
+    return;
+  }
+  
+  alert('Evolução registrada com sucesso!');
+  document.getElementById('peso-evolucao').valeu = '';
+  document.getElementById('observacoes-evolucao').valeu = '';
+  await carregarHistoricoEvolucao();
+        
+  }
+    async function carregarHistoricoEvolucao() {
+  const area = document.getElementById('historico-evolucao');
+
+  const { data, error } = await supabaseClient
+    .from('progress_record')
+    .select('weight, notes, created_at')
+    .eq('patient_id', usuarioAtual.id)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    area.innerHTML = '<p>Erro ao carregar histórico.</p>';
+    console.error(error);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    area.innerHTML = '<p>Nenhum registro de evolução ainda.</p>';
+    return;
+  }
+
+  area.innerHTML = data.map(registro => `
+    <div class="card">
+      <strong>Peso: ${registro.weight} kg</strong>
+      <p>${new Date(registro.created_at).toLocaleDateString('pt-BR')}</p>
+      <p>${registro.notes || 'Sem observações.'}</p>
+    </div>
+  `).join('');
+}
 </script>
 </body>
 </html>
