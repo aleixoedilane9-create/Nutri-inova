@@ -445,9 +445,10 @@ return;
 }
 box.style.display = 'block';
 lista.innerHTML = 'Carregando histórico...';
-const [{ data: avals }, { data: planos }] = await Promise.all([
-supabaseClient.from('assessments').select('').eq('patient_id', patientId).order('created_at', { ascending: false }),
-supabaseClient.from('meal_plans').select('').eq('patient_id', patientId).order('created_at', { ascending: false })
+const [{ data: avals }, { data: planos }, { data: evolucoes }] = await Promise.all([
+supabaseClient.from('assessments').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }),
+supabaseClient.from('meal_plans').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }),
+supabaseClient.from('progress_record').select('weight, notes, created_at').eq('patient_id', patientId).order('created_at', { ascending: false })
 ]);
 let html = '';
 if (planos && planos.length > 0) {
@@ -463,6 +464,20 @@ const d = a.data || {};
 const dataFormatada = new Date(a.created_at).toLocaleDateString('pt-BR');
 html += 'Avaliação' + dataFormatada + 'Peso: ' + d.peso + ' kg | IMC: ' + d.imc + ' | Meta: ' + (d.meta || '-') + '';
 });
+}
+  if (evolucoes && evolucoes.length > 0) {
+  evolucoes.forEach(function(e) {
+    const dataFormatada = new Date(e.created_at).toLocaleDateString('pt-BR');
+
+    html += `
+      <div class="card">
+        <strong>📈 Evolução do paciente</strong>
+        <p>Data: ${dataFormatada}</p>
+        <p>Peso: ${e.weight} kg</p>
+        <p>Observações: ${e.notes || 'Sem observações.'}</p>
+      </div>
+    `;
+  });
 }
 lista.innerHTML = html || 'Nenhum registro enviado para este paciente ainda.';
 }
