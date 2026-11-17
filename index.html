@@ -210,7 +210,35 @@
         <p>Seus regisros aparecerão aqui.</p>
       </div>
     </div>
+<div class="card">
+  <h2>🥗 Meu Diário Alimentar</h2>
+  <p>Registre suas refeições diárias.</p>
 
+  <label>Data</label>
+  <input type="date" id="data-alimentacao">
+
+  <label>Tipo de refeição</label>
+  <select id="tipo-refeicao">
+    <option value="Café da manhã">Café da manhã</option>
+    <option value="Almoço">Almoço</option>
+    <option value="Lanche da tarde">Lanche da tarde</option>
+    <option value="Jantar">Jantar</option>
+    <option value="Ceia">Ceia</option>
+  </select>
+
+  <label>O que você comeu?</label>
+  <textarea id="descricao-alimentacao"
+    placeholder="Descreva sua refeição..."></textarea>
+
+  <button onclick="registrarAlimentacao()">
+    Salvar refeição
+  </button>
+
+  <h3>Meu histórico alimentar</h3>
+  <div id="historico-alimentar">
+    Seus registros aparecerão aqui.
+  </div>
+</div>
     <div class="secao">
       <h2>Meu Plano Alimentar Atual</h2>
       <div id="paciente-planos">
@@ -544,53 +572,6 @@ carregarPainel(data.session.user);
 }
 };
     
-async function registrarEvolucao() {
-  const peso = Number(document.getElementById('peso-evolucao').value);
-  const observacoes = document.getElementById('observacoes-evolucao').value;
-  
-  if (!peso || peso <= 0) {
-    alert('informe um peso válido.');
-    return;
-  }
-  
-  const { data: profile } = await supabaseClient
-  .from('profiles')
-  .select('id')
-  .eq('id', usuarioAtual.id)
-  .single();
-  
-  const { data: vinculo, error: erroVinculo } = await supabaseClient
-  .from('professional_patient_links')
-  .select('nutritionist_id')
-  .eq('patient_id', usuarioAtual.id)
-  .limit(1)
-  .maybeSingle();
-    
-    if (erroVinculo || !vinculo) {
-      alert('Não foi possível localizar o nutricionista vinculado.');
-      return;
-    }
-
-  const { error } = await supabaseClient
-  .from('progress_record')
-  .insert({
-    patient_id: usuarioAtual.id,
-    nutritionist_id: vinculo?.nutritionist_id || null,
-    weight: peso,
-    notes: observacoes
-  });
-
-  if (error) {
-    alert('Erro ao registrar evolucao: ' + error.message);
-    return;
-  }
-  
-  alert('Evolução registrada com sucesso!');
-  document.getElementById('peso-evolucao').value = '';
-  document.getElementById('observacoes-evolucao').value = '';
-  await carregarHistoricoEvolucao();
-        
-  }
     async function carregarHistoricoEvolucao() {
   const area = document.getElementById('historico-evolucao');
 
