@@ -445,7 +445,7 @@ return;
 }
 box.style.display = 'block';
 lista.innerHTML = 'Carregando histórico...';
-const [{ data: avals }, { data: planos }, { data: evolucoes }] = await Promise.all([
+const [{ data: avals, error: erroAvals }, { data: planos, error: erroPlanos }, { data: evolucoes, error: erroEvolucoes }] = await Promise.all([
 supabaseClient.from('assessments').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }),
 supabaseClient.from('meal_plans').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }),
 supabaseClient.from('progress_record').select('weight, notes, created_at').eq('patient_id', patientId).order('created_at', { ascending: false })
