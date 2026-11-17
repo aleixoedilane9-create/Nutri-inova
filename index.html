@@ -679,6 +679,35 @@ carregarPainel(data.session.user);
     </div>
   `).join('');
 }
+   async function registrarEvolucao() {
+  const peso = Number(document.getElementById('peso-evolucao').value);
+  const observacoes = document.getElementById('observacoes-evolucao').value;
+
+  if (!peso || peso <= 0) {
+    alert('Informe um peso válido.');
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from('progress_record')
+    .insert([{
+      patient_id: usuarioAtual.id,
+      weight: peso,
+      notes: observacoes
+    }]);
+
+  if (error) {
+    alert('Erro ao registrar evolução: ' + error.message);
+    return;
+  }
+
+  alert('Evolução registrada com sucesso! ❤️');
+
+  document.getElementById('peso-evolucao').value = '';
+  document.getElementById('observacoes-evolucao').value = '';
+
+  carregarHistoricoEvolucao();
+}
     async function registrarAlimentacao() {
   const data = document.getElementById('data-alimentacao').value;
   const tipo = document.getElementById('tipo-refeicao').value;
