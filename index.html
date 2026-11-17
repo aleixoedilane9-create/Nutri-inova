@@ -399,7 +399,7 @@ const { data: links } = await supabaseClient
 .eq('nutritionist_id', usuarioAtual.id);
 const select = document.getElementById('select-paciente');
 select.innerHTML = '-- Selecione um paciente vinculado --';
-if (links && links.length > 0) {
+if (links && links.length > 0) { 
 links.forEach(function(item) {
 if (item.profiles) {
 const opt = document.createElement('option');
@@ -409,6 +409,39 @@ select.appendChild(opt);
 }
 });
 }
+}
+  async function carregarDiarioPaciente() {
+  const pacienteId = document.getElementById('select-paciente').value;
+  const historico = document.getElementById('diario-paciente-nutricionista');
+
+  if (!pacienteId) {
+    historico.innerHTML = 'Selecione um paciente.';
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from('food_diary')
+    .select('*')
+    .eq('patient_id', pacienteId)
+    .order('data', { ascending: false });
+
+  if (error) {
+    historico.innerHTML = 'Erro ao carregar diário alimentar: ' + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    historico.innerHTML = 'Este paciente ainda não possui refeições registradas.';
+    return;
+  }
+
+  historico.innerHTML = data.map(refeicao => `
+    <div class="card">
+      <strong>${refeicao.data}</strong>
+      <p>${refeicao.tipo_refeicao}</p>
+      <p>${refeicao.descricao}</p>
+    </div>
+  `).join('');
 }
 async function salvarAvaliacao(event) {
 event.preventDefault();
@@ -572,8 +605,7 @@ if (data.session && data.session.user) {
 carregarPainel(data.session.user);
 }
 };
-    
-    async function carregarHistoricoEvolucao() {
+  async function carregarHistoricoEvolucao() {
   const area = document.getElementById('historico-evolucao');
 
   const { data, error } = await supabaseClient
@@ -610,7 +642,7 @@ carregarPainel(data.session.user);
     alert('Preencha a data e descreva sua refeição.');
     return;
   }
-
+      
   const { error } = await supabaseClient
     .from('food_diary')
     .insert([{
