@@ -383,6 +383,7 @@ document.getElementById('painel-paciente').classList.remove('oculto');
 document.getElementById('boas-vindas-paciente').textContent = 'Olá, ' + profile.full_name + '! Acompanhe seu progresso abaixo.';
 carregarDadosDoPaciente();
   carregarDiarioAlimentar();
+  carregarHabitos();
   carregarHistoricoEvolucao();
 }
 }
@@ -716,6 +717,38 @@ carregarPainel(data.session.user);
 
   alert('Hábito registrado com sucesso! 🏆');
   carregarHabitos();
+}
+    async function carregarHabitos() {
+  const historico = document.getElementById('historico-habitos');
+
+  const { data, error } = await supabaseClient
+    .from('habit_logs')
+    .select('*')
+    .eq('patient_id', usuarioAtual.id)
+    .order('data', { ascending: false });
+
+  if (error) {
+    historico.innerHTML = 'Erro ao carregar hábitos: ' + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    historico.innerHTML = 'Você ainda não registrou hábitos.';
+    return;
+  }
+
+  const pontos = data.filter(h => h.concluido).length * 10;
+
+  historico.innerHTML = `
+    <p>⭐ Pontuação: ${pontos} pontos</p>
+    ${data.map(h => `
+      <div class="card">
+        <strong>${h.habito}</strong>
+        <p>Data: ${h.data}</p>
+        <p>${h.concluido ? '✅ Concluído' : '⏳ Pendente'}</p>
+      </div>
+    `).join('')}
+  `;
 }
     async function carregarDiarioAlimentar() {
   const { data, error } = await supabaseClient
