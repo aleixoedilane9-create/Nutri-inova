@@ -691,6 +691,32 @@ carregarPainel(data.session.user);
 
   carregarDiarioAlimentar();
 } 
+    async function registrarHabito() {
+  const habito = document.getElementById('habito-paciente').value;
+  const data = document.getElementById('data-habito').value;
+
+  if (!data) {
+    alert('Selecione a data do hábito.');
+    return;
+  }
+      
+  const { error } = await supabaseClient
+    .from('habit_logs')
+    .insert([{
+      patient_id: usuarioAtual.id,
+      habito: habito,
+      concluido: true,
+      data: data
+    }]);
+
+  if (error) {
+    alert('Erro ao registrar hábito: ' + error.message);
+    return;
+  }
+
+  alert('Hábito registrado com sucesso! 🏆');
+  carregarHabitos();
+}
     async function carregarDiarioAlimentar() {
   const { data, error } = await supabaseClient
     .from('food_diary')
