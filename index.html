@@ -353,6 +353,7 @@ carregarPacientesVinculados();
 document.getElementById('painel-paciente').classList.remove('oculto');
 document.getElementById('boas-vindas-paciente').textContent = 'Olá, ' + profile.full_name + '! Acompanhe seu progresso abaixo.';
 carregarDadosDoPaciente();
+  carregarDiarioAlimentar();
   carregarHistoricoEvolucao();
 }
 }
@@ -597,6 +598,62 @@ carregarPainel(data.session.user);
       <strong>Peso: ${registro.weight} kg</strong>
       <p>${new Date(registro.created_at).toLocaleDateString('pt-BR')}</p>
       <p>${registro.notes || 'Sem observações.'}</p>
+    </div>
+  `).join('');
+}
+    async function registrarAlimentacao() {
+  const data = document.getElementById('data-alimentacao').value;
+  const tipo = document.getElementById('tipo-refeicao').value;
+  const descricao = document.getElementById('descricao-alimentacao').value;
+
+  if (!data || !descricao.trim()) {
+    alert('Preencha a data e descreva sua refeição.');
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from('food_diary')
+    .insert([{
+      patient_id: usuarioAtual.id,
+      data: data,
+      tipo_refeicao: tipo,
+      descricao: descricao
+    }]);
+
+  if (error) {
+    alert('Erro ao salvar refeição: ' + error.message);
+    return;
+  }
+
+  alert('Refeição registrada com sucesso!');
+  document.getElementById('descricao-alimentacao').value = '';
+
+  carregarDiarioAlimentar();
+} 
+    async function carregarDiarioAlimentar() {
+  const { data, error } = await supabaseClient
+    .from('food_diary')
+    .select('*')
+    .eq('patient_id', usuarioAtual.id)
+    .order('data', { ascending: false });
+
+  const historico = document.getElementById('historico-alimentar');
+
+  if (error) {
+    historico.innerHTML = 'Erro ao carregar histórico alimentar.';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    historico.innerHTML = 'Nenhuma refeição registrada ainda.';
+    return;
+  }
+
+  historico.innerHTML = data.map(refeicao => `
+    <div class="card">
+      <strong>${refeicao.data}</strong>
+      <p>${refeicao.tipo_refeicao}</p>
+      <p>${refeicao.descricao}</p>
     </div>
   `).join('');
 }
