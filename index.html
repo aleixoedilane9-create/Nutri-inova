@@ -179,9 +179,21 @@
     </div>
 
     <div class="secao" id="box-historico-nutri" style="display:block;">
-      <h2>Histórico Enviado para este Paciente</h2>
+    ="co  <h2>Histórico Enviado para este Paciente</h2>
       <div id="lista-historico-nutri"></div>
     </div>
+    <div class="card">
+  <h2>🥗 Diário Alimentar do Paciente</h2>
+  <p>Acompanhe as refeições registradas pelo paciente.</p>
+
+  <button onclick="carregarDiarioPaciente()">
+    Consultar Diário Alimentar
+  </button>
+
+  <div id="diario-paciente-nutricionista">
+    Selecione um paciente para consultar.
+  </div>
+</div>
 
     <button class="sair" onclick="fazerLogout()">Sair da Conta</button>
   </div>
@@ -197,7 +209,7 @@
       <input type="number" id="peso-evolucao" step="0.1" placeholder="Ex.: 65.5">
 
       <label for="observacoes-evolucao">Observações</label>
-      <textarea id="observacoes-evolucao" placeholder="como foi sua semana?"></textarea>
+      <textarea id="observacoes-evolucao" placeholdermo foi sua semana?"></textarea>
 
       <button onclick="registrarEvolucao()">
         Registrar minha evolução
