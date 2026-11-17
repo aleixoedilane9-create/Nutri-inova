@@ -180,6 +180,16 @@
 
     <div class="secao" id="box-historico-nutri" style="display:block;">
     ="co  <h2>Histórico Enviado para este Paciente</h2>
+      <div class="card">
+  <h2>🌱 Hábitos e Conquistas do Paciente</h2>
+  <p>Acompanhe os hábitos realizados pelo paciente.</p>
+  <button onclick="carregarHabitosPaciente()">
+    Consultar hábitos do paciente
+  </button>
+  <div id="historico-habitos-nutricionista">
+    Selecione um paciente para consultar.
+  </div>
+</div>
       <div id="lista-historico-nutri"></div>
     </div>
     <div class="card">
@@ -747,6 +757,44 @@ carregarPainel(data.session.user);
 
   historico.innerHTML = `
     <p>⭐ Pontuação: ${pontos} pontos</p>
+    ${data.map(h => `
+      <div class="card">
+        <strong>${h.habito}</strong>
+        <p>Data: ${h.data}</p>
+        <p>${h.concluido ? '✅ Concluído' : '⏳ Pendente'}</p>
+      </div>
+    `).join('')}
+  `;
+}
+    async function carregarHabitosPaciente() {
+  const pacienteId = document.getElementById('select-paciente').value;
+  const historico = document.getElementById('historico-habitos-nutricionista');
+
+  if (!pacienteId) {
+    historico.innerHTML = 'Selecione um paciente.';
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from('habit_logs')
+    .select('*')
+    .eq('patient_id', pacienteId)
+    .order('data', { ascending: false });
+
+  if (error) {
+    historico.innerHTML = 'Erro ao carregar hábitos: ' + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    historico.innerHTML = 'Este paciente ainda não registrou hábitos.';
+    return;
+  }
+
+  const pontos = data.filter(h => h.concluido).length * 10;
+
+  historico.innerHTML = `
+    <p>⭐ Pontuação do paciente: ${pontos} pontos</p>
     ${data.map(h => `
       <div class="card">
         <strong>${h.habito}</strong>
