@@ -616,6 +616,8 @@ console.log('Erro planos:', erroPlanos);
 console.log('Erro evoluções:', erroEvolucoes);
   
 lista.innerHTML = html || 'Nenhum registro enviado para este paciente ainda.';
+ carregarGraficoEvolucaoPeso();
+    carregarHabitosDashboard();
 }
 async function carregarDadosDoPaciente() {
 const [{ data: planos }, { data: avals }] = await Promise.all([
