@@ -204,7 +204,19 @@
     Selecione um paciente para consultar.
   </div>
 </div>
+    <div class="card">
+  <h2>📊 Dashboard de Indicadores Nutricionais</h2>
+  <p>Acompanhe visualmente a evolução dos pacientes.</p>
 
+  <h3>📈 Evolução do Peso</h3>
+  <div style="width:100%; min-height:250px;">
+    <canvas id="grafico-evolucao-peso"></canvas>
+  </div>
+
+  <div id="resumo-evolucao-peso">
+    Selecione um paciente para visualizar sua evolução.
+  </div>
+</div>
     <button class="sair" onclick="fazerLogout()">Sair da Conta</button>
   </div>
 
@@ -296,11 +308,12 @@
       <div id="paciente-avaliacoes">
         <p style="color:#64748b; font-size:14px;">Carregando suas avaliações...</p>
       </div>
-    </div>
-
+    </div> 
+  
     <button class="sair" onclick="fazerLogout()">Sair da Conta</button>
   </div>
   
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     const SUPABASE_URL ="https://fnbcwtmiojqnxplvhyzh.supabase.co";
     const SUPABASE_ANON_KEY ="sb_publishable_jg3eY7maiLDV4TK-JR5Y5A_vpxzvxL-"; 
