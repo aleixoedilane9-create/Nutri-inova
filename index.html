@@ -446,11 +446,10 @@ if (!email) {
 mostrarAviso('Digite o e-mail do paciente para vincular.', 'erro', 'aviso-nutri');
 return;
 }
-const { data: paciente, error: erroBusca } = await supabaseClient
-.from('profiles')
-.select('id, full_name, role')
-.eq('email', email)
-.single();
+const { data: pacientes, error: erroBusca } = await supabaseClient
+.rpc('buscar_paciente_por_email', { email_busca: email });
+
+const paciente = pacientes && pacientes.length > 0 ? pacientes[0] : null;
 if (erroBusca || !paciente) {
 mostrarAviso('Paciente não encontrado. Peça para ele criar uma conta primeiro.', 'erro', 'aviso-nutri');
 return;
