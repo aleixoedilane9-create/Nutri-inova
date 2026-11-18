@@ -108,7 +108,7 @@
       <h2>2. Selecionar Paciente</h2>
       <div class="campo" style="margin-bottom: 0;">
         <label>Escolha o paciente para registrar avaliação ou plano</label>
-        <select id="select-paciente" onchange="carregarHistoricoPacienteNutri(); carregarGraficoEvolucaoPeso()">
+        <select id="select-paciente" onchange="carregarHistoricoPacienteNutri(); carregarGraficoEvolucaoPeso(); carregarHabitosDashboard()">
           <option value="">-- Selecione um paciente vinculado --</option>
         </select>
       </div>
@@ -215,6 +215,14 @@
 
   <div id="resumo-evolucao-peso">
     Selecione um paciente para visualizar sua evolução.
+  </div>
+</div>
+    <div class="card">
+  <h2>🏆 Hábitos e Conquistas</h2>
+  <p>Acompanhe o compromisso do paciente com suas metas.</p>
+
+  <div id="resumo-habitos-dashboard">
+    Selecione um paciente para visualizar seus hábitos.
   </div>
 </div>
     <button class="sair" onclick="fazerLogout()">Sair da Conta</button>
@@ -782,6 +790,45 @@ async function carregarGraficoEvolucaoPeso() {
       maintainAspectRatio: false
     }
   });
+}
+    async function carregarHabitosDashboard() {
+  const pacienteId = document.getElementById('select-paciente').value;
+  const resumo = document.getElementById('resumo-habitos-dashboard');
+
+  if (!pacienteId) {
+    resumo.innerHTML = 'Selecione um paciente para visualizar seus hábitos.';
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from('habit_logs')
+    .select('*')
+    .eq('patient_id', pacienteId)
+    .order('data', { ascending: false });
+
+  if (error) {
+    resumo.innerHTML = 'Erro ao carregar hábitos: ' + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    resumo.innerHTML = 'Este paciente ainda não registrou hábitos.';
+    return;
+  }
+
+  const pontos = data.filter(h => h.concluido).length * 10;
+
+  resumo.innerHTML = `
+    <h3>⭐ Pontuação: ${pontos} pontos</h3>
+    <p>Hábitos registrados: ${data.length}</p>
+    ${data.map(h => `
+      <div class="card">
+        <strong>${h.habito}</strong>
+        <p>Data: ${h.data}</p>
+        <p>${h.concluido ? '✅ Concluído' : '⏳ Pendente'}</p>
+      </div>
+    `).join('')}
+  `;
 }
     async function registrarAlimentacao() {
   const data = document.getElementById('data-alimentacao').value;
