@@ -601,6 +601,10 @@ html += 'Avaliação' + dataFormatada + 'Peso: ' + d.peso + ' kg | IMC: ' + d.im
   });
 }
   console.log('Evoluções:', evolucoes, erroEvolucoes);
+  console.log('Erro avaliações:', erroAvals);
+console.log('Erro planos:', erroPlanos);
+console.log('Erro evoluções:', erroEvolucoes);
+  
 lista.innerHTML = html || 'Nenhum registro enviado para este paciente ainda.';
 }
 async function carregarDadosDoPaciente() {
