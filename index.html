@@ -108,7 +108,7 @@
       <h2>2. Selecionar Paciente</h2>
       <div class="campo" style="margin-bottom: 0;">
         <label>Escolha o paciente para registrar avaliação ou plano</label>
-        <select id="select-paciente" onchange="carregarHistoricoPacienteNutri()">
+        <select id="select-paciente" onchange="carregarHistoricoPacienteNutri(); carregarGraficoEvolucaoPeso()">
           <option value="">-- Selecione um paciente vinculado --</option>
         </select>
       </div>
@@ -720,6 +720,64 @@ carregarPainel(data.session.user);
   document.getElementById('observacoes-evolucao').value = '';
 
   carregarHistoricoEvolucao();
+}
+    let graficoEvolucaoPeso = null;
+
+async function carregarGraficoEvolucaoPeso() {
+  const pacienteId = document.getElementById('select-paciente').value;
+  const resumo = document.getElementById('resumo-evolucao-peso');
+
+  if (graficoEvolucaoPeso) {
+    graficoEvolucaoPeso.destroy();
+    graficoEvolucaoPeso = null;
+  }
+
+  if (!pacienteId) {
+    resumo.innerHTML = 'Selecione um paciente para visualizar sua evolução.';
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from('progress_record')
+    .select('weight, created_at')
+    .eq('patient_id', pacienteId)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    resumo.innerHTML = 'Erro ao carregar evolução: ' + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    resumo.innerHTML = 'Este paciente ainda não possui registros de evolução.';
+    return;
+  }
+
+  resumo.innerHTML = 'Registros de evolução do peso: ' + data.length;
+
+  const labels = data.map(registro =>
+    new Date(registro.created_at).toLocaleDateString('pt-BR')
+  );
+
+  const pesos = data.map(registro => Number(registro.weight));
+
+  const ctx = document.getElementById('grafico-evolucao-peso').getContext('2d');
+
+  graficoEvolucaoPeso = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Peso (kg)',
+        data: pesos,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
 }
     async function registrarAlimentacao() {
   const data = document.getElementById('data-alimentacao').value;
