@@ -192,6 +192,7 @@
 </div>
       <div id="lista-historico-nutri"></div>
     </div>
+  </div>
     <div class="card">
   <h2>🥗 Diário Alimentar do Paciente</h2>
   <p>Acompanhe as refeições registradas pelo paciente.</p>
@@ -567,57 +568,99 @@ mostrarAviso('Plano alimentar enviado com sucesso para o paciente!', 'sucesso', 
 carregarHistoricoPacienteNutri();
 }
 async function carregarHistoricoPacienteNutri() {
-const patientId = document.getElementById('select-paciente').value;
-const box = document.getElementById('box-historico-nutri');
-const lista = document.getElementById('lista-historico-nutri');
-if (!patientId) {
-box.style.display = 'none';
-return;
-}
-box.style.display = 'block';
-lista.innerHTML = 'Carregando histórico...';
-const [{ data: avals, error: erroAvals }, { data: planos, error: erroPlanos }, { data: evolucoes, error: erroEvolucoes }] = await Promise.all([
-supabaseClient.from('assessments').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }),
-supabaseClient.from('meal_plans').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }),
-supabaseClient.from('progress_record').select('weight, notes, created_at').eq('patient_id', patientId).order('created_at', { ascending: false })
-]);
-let html = '';
-if (planos && planos.length > 0) {
-planos.forEach(function(p) {
-const d = p.plan_data || {};
-const dataFormatada = new Date(p.created_at).toLocaleDateString('pt-BR');
-html += 'Plano Alimentar' + dataFormatada + '' + (d.titulo || 'Plano') + '';
-});
-}
-if (avals && avals.length > 0) {
-avals.forEach(function(a) {
-const d = a.data || {};
-const dataFormatada = new Date(a.created_at).toLocaleDateString('pt-BR');
-html += 'Avaliação' + dataFormatada + 'Peso: ' + d.peso + ' kg | IMC: ' + d.imc + ' | Meta: ' + (d.meta || '-') + '';
-});
-}
-  if (evolucoes && evolucoes.length > 0) {
-  evolucoes.forEach(function(e) {
-    const dataFormatada = new Date(e.created_at).toLocaleDateString('pt-BR');
+  const patientId = document.getElementById('select-paciente').value;
+  const box = document.getElementById('box-historico-nutri');
+  const lista = document.getElementById('lista-historico-nutri');
 
-    html += `
-      <div class="card">
-        <strong>📈 Evolução do paciente</strong>
-        <p>Data: ${dataFormatada}</p>
-        <p>Peso: ${e.weight} kg</p>
-        <p>Observações: ${e.notes || 'Sem observações.'}</p>
-      </div>
-    `;
-  });
-}
-  console.log('Evoluções:', evolucoes, erroEvolucoes);
-  console.log('Erro avaliações:', erroAvals);
-console.log('Erro planos:', erroPlanos);
-console.log('Erro evoluções:', erroEvolucoes);
-  
-lista.innerHTML = html || 'Nenhum registro enviado para este paciente ainda.';
- carregarGraficoEvolucaoPeso();
-    carregarHabitosDashboard();
+  if (!patientId) {
+    box.style.display = 'none';
+    lista.innerHTML = '';
+    return;
+  }
+
+  box.style.display = 'block';
+  lista.innerHTML = 'Carregando histórico...';
+
+  const [
+    { data: avals, error: erroAvals },
+    { data: planos, error: erroPlanos },
+    { data: evolucoes, error: erroEvolucoes }
+  ] = await Promise.all([
+    supabaseClient.from('assessments')
+      .select('*')
+      .eq('patient_id', patientId)
+      .order('created_at', { ascending: false }),
+
+    supabaseClient.from('meal_plans')
+      .select('*')
+      .eq('patient_id', patientId)
+      .order('created_at', { ascending: false }),
+
+    supabaseClient.from('progress_record')
+      .select('weight, notes, created_at')
+      .eq('patient_id', patientId)
+      .order('created_at', { ascending: false })
+  ]);
+
+  if (erroAvals || erroPlanos || erroEvolucoes) {
+    console.error(erroAvals, erroPlanos, erroEvolucoes);
+    lista.innerHTML = 'Erro ao carregar o histórico. Verifique o console.';
+    return;
+  }
+
+  let html = '';
+
+  if (planos && planos.length > 0) {
+    planos.forEach(function(p) {
+      const d = p.plan_data || {};
+      const dataFormatada = new Date(p.created_at).toLocaleDateString('pt-BR');
+
+      html += `
+        <div class="card">
+          <strong>🥗 Plano Alimentar</strong>
+          <p>Data: ${dataFormatada}</p>
+          <p>${d.titulo || 'Plano'}</p>
+        </div>
+      `;
+    });
+  }
+
+  if (avals && avals.length > 0) {
+    avals.forEach(function(a) {
+      const d = a.data || {};
+      const dataFormatada = new Date(a.created_at).toLocaleDateString('pt-BR');
+
+      html += `
+        <div class="card">
+          <strong>📋 Avaliação Nutricional</strong>
+          <p>Data: ${dataFormatada}</p>
+          <p>Peso: ${d.peso || '-'} kg</p>
+          <p>IMC: ${d.imc || '-'}</p>
+          <p>Meta: ${d.meta || '-'}</p>
+        </div>
+      `;
+    });
+  }
+
+  if (evolucoes && evolucoes.length > 0) {
+    evolucoes.forEach(function(e) {
+      const dataFormatada = new Date(e.created_at).toLocaleDateString('pt-BR');
+
+      html += `
+        <div class="card">
+          <strong>📈 Evolução do paciente</strong>
+          <p>Data: ${dataFormatada}</p>
+          <p>Peso: ${e.weight} kg</p>
+          <p>Observações: ${e.notes || 'Sem observações.'}</p>
+        </div>
+      `;
+    });
+  }
+
+  lista.innerHTML = html || 'Nenhum registro enviado para este paciente ainda.';
+
+  await carregarGraficoEvolucaoPeso();
+  await carregarHabitosDashboard();
 }
 async function carregarDadosDoPaciente() {
 const [{ data: planos }, { data: avals }] = await Promise.all([
