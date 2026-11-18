@@ -481,7 +481,7 @@ const { data: links } = await supabaseClient
 .select('patient_id, profiles!professional_patient_links_patient_id_fkey(id, full_name, email)')
 .eq('nutritionist_id', usuarioAtual.id);
 const select = document.getElementById('select-paciente');
-select.innerHTML = '-- Selecione um paciente vinculado --';
+select.innerHTML = '<option value="">-- Selecione um paciente vinculado --</option>';
 if (links && links.length > 0) { 
 links.forEach(function(item) {
 if (item.profiles) {
